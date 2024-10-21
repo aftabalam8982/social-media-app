@@ -1,16 +1,24 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Feeds from "./pages/feed/Feeds";
+import AppBar from "./pages/appbar/AppBar.page";
+import LoginRegisterPage from "./pages/login-register/LoginAndRegister.page";
+import UserProfilePage from "./pages/userpage/User.page";
 
-function App() {
-  const [count, setCount] = useState(0);
-
+const App: React.FC = () => {
   return (
-    <>
-      <h1>this is social media app</h1>
-    </>
+    <Router>
+      <div>
+        <AppBar />
+        <Routes>
+          <Route path='/' element={<Feeds />} />
+          <Route path='feeds' element={<Feeds />} />
+          <Route path='login' element={<LoginRegisterPage />} />
+          <Route path='/user/:userId' element={<UserProfilePage />} />
+        </Routes>
+      </div>
+    </Router>
   );
-}
+};
 
 export default App;

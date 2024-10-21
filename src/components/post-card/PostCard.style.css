@@ -1,0 +1,30 @@
+/* PostCard.style.css */
+.post-card {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    background-color: #fff;
+    width: 100%;
+    max-width: 500px;
+    margin: 10px auto;
+}
+
+.post-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.post-card-image {
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.post-card-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
