@@ -4,7 +4,6 @@ import {
   query,
   orderBy,
   limit,
-  getDocs,
   startAfter,
   onSnapshot,
 } from "firebase/firestore";
@@ -19,7 +18,6 @@ const Feeds: React.FC = () => {
   const [hasMore, setHasMore] = useState(true); // Determines if more posts are available for infinite scroll
   const [loading, setLoading] = useState(false);
 
-  console.log(posts);
   // Function to fetch initial posts
   const fetchPosts = async () => {
     if (loading) return;

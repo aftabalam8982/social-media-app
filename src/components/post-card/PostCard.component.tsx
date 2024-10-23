@@ -38,45 +38,24 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
     try {
       const postRef = doc(db, "posts", postId);
       const postDocSnapshot = await getDoc(postRef);
-      const postData = postDocSnapshot.data();
-      const likedData = postData?.likes;
-      const hasLiked = likedData.some(
-        (user: any) => user.uid === currentUser.uid
-      );
-      if (likedData.length !== 0) {
-        if (hasLiked) {
-          await updateDoc(postRef, {
-            likes: arrayRemove({ uid: currentUser.uid }),
-          });
+      if (postDocSnapshot.exists()) {
+        const postData = postDocSnapshot.data();
+        const likedData = postData?.likes;
+        const hasLiked = likedData.some(
+          (user: any) => user.uid === currentUser.uid
+        );
+        if (likedData.length !== 0) {
+          if (hasLiked) {
+            await updateDoc(postRef, {
+              likes: arrayRemove({ uid: currentUser.uid }),
+            });
+          }
         }
+        await updateDoc(postRef, {
+          likes: arrayUnion({ uid: currentUser.uid }),
+        });
+        setIsLiked(!hasLiked);
       }
-      await updateDoc(postRef, { likes: arrayUnion({ uid: currentUser.uid }) });
-      setIsLiked(!hasLiked);
-      console.log();
-      // if (postDocSnapshot.exists()) {
-      //   const postData = postDocSnapshot.data();
-      //   const likesArray = postData.likes || []; // Get the current likes array or initialize it as empty
-
-      //   // Check if the user has already liked the post
-      //   const userHasLiked = likesArray.some(
-      //     (user: any) => user.uid === currentUser.uid
-      //   ); // Assuming each user object has a uid property
-
-      //   if (userHasLiked) {
-      //     // User has already liked, so we need to remove them from the likes array
-      //     await updateDoc(postRef, {
-      //       likes: arrayRemove({ uid: currentUser.uid }), // Remove user by their uid
-      //     });
-      //   } else {
-      //     // User has not liked yet, add them to the likes array
-      //     await updateDoc(postRef, {
-      //       likes: arrayUnion({ uid: currentUser.uid }), // Add user by their uid
-      //     });
-      //   }
-
-      //   // Optionally, you may want to update the local state for UI feedback
-      //   setIsLiked(!isLiked); // Toggle the like state
-      // }
     } catch (error: any) {
       console.error("Error updating likes:", error.message);
     }

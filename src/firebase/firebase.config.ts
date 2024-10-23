@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { createUserWithEmailAndPassword, getAuth, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { collection, doc, getDoc, getDocs, getFirestore, setDoc } from "firebase/firestore";
+import { doc, getDoc, getFirestore, setDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { UserAuthProps } from "../types/types";
 
@@ -23,14 +23,6 @@ export const signInWithGooglePopup = () => {
 }
 
 export const db = getFirestore(app);
-
-// const getPostCollection = async () => {
-//     const postRef = await collection(db, 'posts');
-//     const postSnapshot = await getDocs(postRef);
-//     const posts = await postSnapshot.docs.map((doc) => doc.data())
-//     console.log(posts.find((value) => value.postId === 'post1'));
-// }
-// getPostCollection()
 
 
 export const createUserDocumentFromAuth = async (userAuth: UserAuthProps, additionalInfo?: { displayName?: string | null }) => {

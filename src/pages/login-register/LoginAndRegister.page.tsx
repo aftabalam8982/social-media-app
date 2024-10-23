@@ -1,4 +1,3 @@
-// components/LoginRegisterPage.tsx
 import React, { useState } from "react";
 import "./LoginAndRegister.style.css";
 import RegisterForm from "../../components/register/RegisterForm.component";

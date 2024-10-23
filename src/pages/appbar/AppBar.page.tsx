@@ -13,7 +13,7 @@ const AppBar: React.FC = () => {
   const handleLogout = async () => {
     try {
       await logoutUser();
-      navigate("/login"); // Redirect to login after logging out
+      navigate("/feeds"); // Redirect to login after logging out
     } catch (err) {
       console.error("Error during sign out:", err);
     }
@@ -38,7 +38,6 @@ const AppBar: React.FC = () => {
       </div>
 
       <div className='nav-items '>
-        {/* Conditionally render based on whether the user is logged in or not */}
         {currentUser ? (
           <div className='logged-in-container'>
             <span

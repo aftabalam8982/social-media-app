@@ -66,7 +66,6 @@ const UserProfilePage: React.FC = () => {
   const handlePostCreated = async () => {
     await fetchUserPosts(); // Call the fetchUserPosts function
   };
-  console.log(userPosts);
   return (
     <div>
       <h3 style={{ textAlign: "center" }}>Create Post</h3>

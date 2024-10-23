@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  doc,
-  updateDoc,
-  arrayUnion,
-  getDoc,
-  arrayRemove,
-  onSnapshot,
-} from "firebase/firestore";
+import { doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
 import "./Comment.style.css";
 import { db } from "../../firebase/firebase.config";
 import Button from "../button/Button.component";
@@ -34,7 +27,6 @@ const CommentModal: React.FC<CommentModalProps> = ({
     console.log(postId);
     try {
       const postRef = doc(db, "posts", postId);
-      // const unsubscribe = onSnapshot(postRef, (snapshot) => {
       const postDoc = await getDoc(postRef);
       if (postDoc.exists()) {
         updateDoc(postRef, {
@@ -48,7 +40,6 @@ const CommentModal: React.FC<CommentModalProps> = ({
       } else {
         console.error("Post does not exist");
       }
-      // });
     } catch (err) {
       console.error("Error adding comment:", err);
     }

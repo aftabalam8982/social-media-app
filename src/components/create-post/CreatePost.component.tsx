@@ -44,10 +44,8 @@ const CreatePost: React.FC<CreatePostProps> = ({ onPostCreated }) => {
       await updateDoc(postRef, {
         postId: postRef.id,
       });
-
       // Notify the parent component about the new post
       onPostCreated();
-
       // Clear the input field
       setImageUrl("");
       setError("");
