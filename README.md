@@ -1,3 +1,34 @@
+# Mini My Social Media App
+
+**Production URL**: [Mini My Social Media](https://mini-my-social-media.netlify.app/)
+
+A simple social media app where users can view posts, like, comment, and interact in real-time. User authentication is required for interactions, but posts are publicly visible.
+
+## Features
+
+- **Google Sign-In**: Users must sign in to like, comment, or save posts.
+- **Real-time Updates**: Posts, likes, and comments update instantly via Firebase Firestore.
+- **Publicly Visible Posts**: Posts can be viewed by anyone, but interaction requires sign-in.
+
+## Tech Stack
+
+- **Frontend**: React, Vite, TypeScript, CSS Modules.
+- **Backend**: Firebase (Authentication, Firestore).
+- **Deployment**: Netlify.
+
+## Setup Instructions
+
+### 1. Clone the repository
+
+````bash
+git clone https://github.com/yourusername/mini-my-social-media.git
+
+```npm
+npm install
+npm run dev
+
+
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
@@ -23,7 +54,7 @@ export default tseslint.config({
     },
   },
 })
-```
+````
 
 - Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
 - Optionally add `...tseslint.configs.stylisticTypeChecked`
@@ -31,11 +62,11 @@ export default tseslint.config({
 
 ```js
 // eslint.config.js
-import react from 'eslint-plugin-react'
+import react from "eslint-plugin-react";
 
 export default tseslint.config({
   // Set the react version
-  settings: { react: { version: '18.3' } },
+  settings: { react: { version: "18.3" } },
   plugins: {
     // Add the react plugin
     react,
@@ -44,7 +75,7 @@ export default tseslint.config({
     // other rules...
     // Enable its recommended rules
     ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
+    ...react.configs["jsx-runtime"].rules,
   },
-})
+});
 ```
