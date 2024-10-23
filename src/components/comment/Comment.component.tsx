@@ -1,27 +1,54 @@
 import React, { useState } from "react";
-import { doc, updateDoc, arrayUnion } from "firebase/firestore";
+import {
+  doc,
+  updateDoc,
+  arrayUnion,
+  getDoc,
+  arrayRemove,
+} from "firebase/firestore";
 import "./Comment.style.css";
 import { db } from "../../firebase/firebase.config";
+import Button from "../button/Button.component";
+import { useAuth } from "../../contexts/userAuthContext";
 
 interface CommentModalProps {
   postId: string;
   comments: any[];
+  setIsOpen: (value: boolean) => void;
+  isOpen: boolean;
 }
 
-const CommentModal: React.FC<CommentModalProps> = ({ postId, comments }) => {
+const CommentModal: React.FC<CommentModalProps> = ({
+  postId,
+  comments,
+  setIsOpen,
+  isOpen,
+}) => {
   const [newComment, setNewComment] = useState("");
   const [reply, setReply] = useState("");
   const [isReplying, setIsReplying] = useState(false);
+  const { currentUser } = useAuth();
 
   const handleAddComment = async () => {
-    const postRef = doc(db, "posts", postId);
-    await updateDoc(postRef, {
-      comments: arrayUnion({
-        username: "currentUsername", // Get username from Auth
-        text: newComment,
-      }),
-    });
-    setNewComment("");
+    console.log(postId);
+    try {
+      const postRef = await doc(db, "posts", postId);
+      const postDoc = await getDoc(postRef);
+      if (postDoc.exists()) {
+        await updateDoc(postRef, {
+          comments: arrayUnion({
+            username: currentUser?.displayName,
+            text: newComment,
+            replies: [],
+          }),
+        });
+        setIsOpen(!isOpen);
+      } else {
+        console.error("Post does not exist");
+      }
+    } catch (err) {
+      console.error("Error adding comment:", err);
+    }
   };
 
   return (
@@ -31,7 +58,11 @@ const CommentModal: React.FC<CommentModalProps> = ({ postId, comments }) => {
           <div key={index} className='comment'>
             <span>{comment.username}</span>
             <p>{comment.text}</p>
-            <button onClick={() => setIsReplying(!isReplying)}>Reply</button>
+            <Button
+              label='Reply'
+              onClick={() => setIsReplying(!isReplying)}
+              style='comment'
+            />
             {isReplying && (
               <div className='reply-section'>
                 <input
@@ -39,7 +70,7 @@ const CommentModal: React.FC<CommentModalProps> = ({ postId, comments }) => {
                   onChange={(e) => setReply(e.target.value)}
                   placeholder='Write a reply'
                 />
-                <button>Send</button>
+                <Button label='Send' style='comment' />
               </div>
             )}
           </div>
@@ -51,7 +82,11 @@ const CommentModal: React.FC<CommentModalProps> = ({ postId, comments }) => {
           onChange={(e) => setNewComment(e.target.value)}
           placeholder='Write a comment'
         />
-        <button onClick={handleAddComment}>Add Comment</button>
+        <Button
+          label='Add Comment'
+          onClick={handleAddComment}
+          style='comment'
+        />
       </div>
     </div>
   );

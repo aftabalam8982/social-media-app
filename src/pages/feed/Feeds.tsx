@@ -17,6 +17,7 @@ const Feeds: React.FC = () => {
   const [lastVisible, setLastVisible] = useState<any>(null); // Keeps track of last document fetched
   const [hasMore, setHasMore] = useState(true); // Determines if more posts are available for infinite scroll
 
+  console.log(posts);
   // Function to fetch initial posts
   const fetchPosts = async () => {
     try {
@@ -68,30 +69,19 @@ const Feeds: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchPosts(); // Fetch initial posts when the component mounts
+    fetchPosts();
   }, []);
 
   return (
     <InfiniteScroll
-      dataLength={posts.length} // Length of the current posts array
-      next={fetchMorePosts} // Function to call when more posts are needed
-      hasMore={hasMore} // Boolean that determines if more posts should be fetched
-      loader={<h4>Loading...</h4>} // Loader displayed while fetching more posts
-      endMessage={<p>No more posts to load</p>} // Message displayed when no more posts
+      dataLength={posts.length}
+      next={fetchMorePosts}
+      hasMore={hasMore}
+      loader={<h4>Loading...</h4>}
+      endMessage={<p>No more posts to load</p>}
     >
       {posts.map((post) => (
-        <PostCard
-          key={post.id} // Ensure a unique key for each post
-          id={post.id}
-          userId={post.userId}
-          imageUrl={post.imageUrl}
-          username={post.username}
-          likes={post.likes} // Assuming likes is an array
-          comments={post.comments} // Assuming comments is an array
-          postId={post.postId}
-          savedBy={post.savedBy}
-          createdAt={post.createdAt}
-        />
+        <PostCard key={post.id} post={post} />
       ))}
     </InfiniteScroll>
   );

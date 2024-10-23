@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { createUserWithEmailAndPassword, getAuth, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { doc, getDoc, getFirestore, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, getFirestore, setDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { UserAuthProps } from "../types/types";
 
@@ -24,17 +24,21 @@ export const signInWithGooglePopup = () => {
 
 export const db = getFirestore(app);
 
+const getPostCollection = async () => {
+    const postRef = await collection(db, 'posts');
+    const postSnapshot = await getDocs(postRef);
+    const posts = await postSnapshot.docs.map((doc) => doc.data())
+    console.log(posts.find((value) => value.postId === 'post1'));
+}
+// getPostCollection()
 
 
 export const createUserDocumentFromAuth = async (userAuth: UserAuthProps, additionalInfo?: { displayName?: string | null }) => {
     if (!userAuth) return;
     const userDocRef = await doc(db, 'users', userAuth.uid);    // checking if the user is document is available in db .
     // console.log(userDocRef)
-
     const userSnapshot = await getDoc(userDocRef);    // getting user Document from firebase db.
-
     // console.log(userSnapshot.exists())   // return if exit userDoc return true otherwise return false
-
     if (!userSnapshot.exists()) {
         const { displayName, email } = userAuth;
         const createdAt = new Date();

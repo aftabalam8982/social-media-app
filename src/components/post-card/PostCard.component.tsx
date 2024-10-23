@@ -5,20 +5,24 @@ import { updateDoc, doc, arrayUnion } from "firebase/firestore";
 import { useAuth } from "../../contexts/userAuthContext";
 import { db } from "../../firebase/firebase.config";
 import { Post } from "../../types/types";
+import CommentModal from "../comment/Comment.component";
+import Button from "../button/Button.component";
 
-const PostCard: React.FC<Post> = ({
-  id,
-  userId,
-  imageUrl,
-  username,
-  likes, // Assuming this is an array of strings (user IDs)
-  comments,
-}) => {
+interface PostCardProps {
+  post: Post;
+}
+
+const PostCard: React.FC<PostCardProps> = ({ post }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
+  const { id, userId, imageUrl, username, likes, comments, postId } = post;
+
+  console.log("re-render");
   const handleLike = () => {
     setIsLiked(!isLiked);
   };
@@ -43,7 +47,14 @@ const PostCard: React.FC<Post> = ({
     navigate(`/user/${userId}`);
   };
 
-  // Calculate total likes based on the likes array
+  const handleComment = () => {
+    if (!currentUser) {
+      alert("User need to sign in first");
+      return;
+    }
+    setIsOpen(!isOpen);
+  };
+
   const totalLikes = likes.length + (isLiked ? 1 : 0); // Count likes as the length of the array
 
   return (
@@ -54,15 +65,41 @@ const PostCard: React.FC<Post> = ({
         </h4>
       </div>
       <div>
-        <img src={imageUrl} alt='Post' className='post-card-image' />
+        <img
+          loading='eager'
+          fetchPriority='high'
+          src={imageUrl}
+          alt='Post'
+          className='post-card-image'
+        />
       </div>
       <div className='post-card-actions'>
-        <button onClick={handleLike}>{isLiked ? "❤️ Liked" : "🤍 Like"}</button>
-        <span>{totalLikes} Likes</span> {/* Display total likes here */}
-        <button onClick={handleSave}>{isSaved ? "🔖 Saved" : "📑 Save"}</button>
+        <Button
+          label={isLiked ? "❤️ Liked" : "🤍 Like"}
+          onClick={handleLike}
+          style='comment'
+        />
+        <span>{totalLikes} Likes</span>
+        <Button
+          label={isSaved ? "🔖 Saved" : "📑 Save"}
+          onClick={handleSave}
+          style='comment'
+        />
       </div>
       <div>
-        <button>🗨️ Comments ({comments.length})</button>
+        <Button
+          label={`🗨️ Comments ${comments.length}`}
+          onClick={handleComment}
+          style='comment'
+        />
+        {isOpen && (
+          <CommentModal
+            postId={postId}
+            comments={comments}
+            setIsOpen={setIsOpen}
+            isOpen={isOpen}
+          />
+        )}
       </div>
     </div>
   );

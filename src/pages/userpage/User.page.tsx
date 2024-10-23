@@ -66,7 +66,7 @@ const UserProfilePage: React.FC = () => {
   const handlePostCreated = async () => {
     await fetchUserPosts(); // Call the fetchUserPosts function
   };
-
+  console.log(userPosts);
   return (
     <div>
       <h3 style={{ textAlign: "center" }}>Create Post</h3>
@@ -80,20 +80,8 @@ const UserProfilePage: React.FC = () => {
       >
         My Posts
       </h3>
-      {userPosts.map((post) => (
-        <PostCard
-          key={post.id} // Ensure to use a unique key, using post.id
-          id={post.id}
-          userId={post.userId}
-          imageUrl={post.imageUrl}
-          username={post.username}
-          likes={post.likes} // Assuming likes is an array
-          comments={post.comments} // Assuming comments is an array
-          postId={post.postId}
-          savedBy={post.savedBy}
-          createdAt={post.createdAt}
-        />
-      ))}
+      {userPosts &&
+        userPosts.map((post) => <PostCard key={post.id} post={post} />)}
       <h3
         style={{
           borderTop: "2px solid black",
@@ -105,18 +93,7 @@ const UserProfilePage: React.FC = () => {
       </h3>
 
       {savedPosts.map((post) => (
-        <PostCard
-          key={post.id} // Ensure to use a unique key, using post.id
-          id={post.id}
-          userId={post.userId}
-          imageUrl={post.imageUrl}
-          username={post.username}
-          likes={post.likes} // Assuming likes is an array
-          comments={post.comments} // Assuming comments is an array
-          postId={post.postId}
-          savedBy={post.savedBy}
-          createdAt={post.createdAt}
-        />
+        <PostCard key={post.id} post={post} />
       ))}
     </div>
   );

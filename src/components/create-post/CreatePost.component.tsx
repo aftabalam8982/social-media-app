@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./CreatePost.style.css";
 import { db } from "../../firebase/firebase.config";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, updateDoc } from "firebase/firestore";
 import { useAuth } from "../../contexts/userAuthContext";
 
 interface CreatePostProps {
@@ -28,7 +28,9 @@ const CreatePost: React.FC<CreatePostProps> = ({ onPostCreated }) => {
 
     try {
       const postsCollectionRef = collection(db, "posts");
-      await addDoc(postsCollectionRef, {
+
+      // Create the new post and get the document reference
+      const postRef = await addDoc(postsCollectionRef, {
         imageUrl,
         username: currentUser.displayName || currentUser.email,
         userId: currentUser.uid,
@@ -36,6 +38,11 @@ const CreatePost: React.FC<CreatePostProps> = ({ onPostCreated }) => {
         likes: [],
         comments: [],
         savedBy: [],
+      });
+
+      // Now that the post is created, set the `postId` as the document ID
+      await updateDoc(postRef, {
+        postId: postRef.id,
       });
 
       // Notify the parent component about the new post
