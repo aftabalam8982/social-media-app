@@ -58,7 +58,7 @@ const CreatePost: React.FC<CreatePostProps> = ({ onPostCreated }) => {
   return (
     <form onSubmit={handleSubmit} className='create-post-form'>
       <input
-        type='text'
+        type='url'
         placeholder='Image URL'
         value={imageUrl}
         onChange={(e) => setImageUrl(e.target.value)}
