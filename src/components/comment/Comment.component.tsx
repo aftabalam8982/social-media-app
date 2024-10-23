@@ -5,6 +5,7 @@ import {
   arrayUnion,
   getDoc,
   arrayRemove,
+  onSnapshot,
 } from "firebase/firestore";
 import "./Comment.style.css";
 import { db } from "../../firebase/firebase.config";
@@ -32,30 +33,39 @@ const CommentModal: React.FC<CommentModalProps> = ({
   const handleAddComment = async () => {
     console.log(postId);
     try {
-      const postRef = await doc(db, "posts", postId);
+      const postRef = doc(db, "posts", postId);
+      // const unsubscribe = onSnapshot(postRef, (snapshot) => {
       const postDoc = await getDoc(postRef);
       if (postDoc.exists()) {
-        await updateDoc(postRef, {
+        updateDoc(postRef, {
           comments: arrayUnion({
             username: currentUser?.displayName,
             text: newComment,
             replies: [],
           }),
         });
-        setIsOpen(!isOpen);
+        setNewComment("");
       } else {
         console.error("Post does not exist");
       }
+      // });
     } catch (err) {
       console.error("Error adding comment:", err);
     }
   };
 
+  const handleClose = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
     <div className='comment-modal'>
+      <button onClick={handleClose} className='close-model'>
+        close
+      </button>
       <div className='comments-section'>
         {comments.map((comment, index) => (
-          <div key={index} className='comment'>
+          <div key={index} className='comment-sec'>
             <span>{comment.username}</span>
             <p>{comment.text}</p>
             <Button

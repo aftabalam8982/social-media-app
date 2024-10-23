@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./PostCard.style.css";
-import { updateDoc, doc, arrayUnion } from "firebase/firestore";
+import {
+  updateDoc,
+  doc,
+  arrayUnion,
+  getDoc,
+  arrayRemove,
+} from "firebase/firestore";
 import { useAuth } from "../../contexts/userAuthContext";
 import { db } from "../../firebase/firebase.config";
 import { Post } from "../../types/types";
@@ -23,8 +29,57 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
   const { id, userId, imageUrl, username, likes, comments, postId } = post;
 
   console.log("re-render");
-  const handleLike = () => {
-    setIsLiked(!isLiked);
+  const handleLike = async () => {
+    if (!currentUser) {
+      alert("Please sign in first to like this post!");
+      return; // Early return if user is not signed in
+    }
+
+    try {
+      const postRef = doc(db, "posts", postId);
+      const postDocSnapshot = await getDoc(postRef);
+      const postData = postDocSnapshot.data();
+      const likedData = postData?.likes;
+      const hasLiked = likedData.some(
+        (user: any) => user.uid === currentUser.uid
+      );
+      if (likedData.length !== 0) {
+        if (hasLiked) {
+          await updateDoc(postRef, {
+            likes: arrayRemove({ uid: currentUser.uid }),
+          });
+        }
+      }
+      await updateDoc(postRef, { likes: arrayUnion({ uid: currentUser.uid }) });
+      setIsLiked(!hasLiked);
+      console.log();
+      // if (postDocSnapshot.exists()) {
+      //   const postData = postDocSnapshot.data();
+      //   const likesArray = postData.likes || []; // Get the current likes array or initialize it as empty
+
+      //   // Check if the user has already liked the post
+      //   const userHasLiked = likesArray.some(
+      //     (user: any) => user.uid === currentUser.uid
+      //   ); // Assuming each user object has a uid property
+
+      //   if (userHasLiked) {
+      //     // User has already liked, so we need to remove them from the likes array
+      //     await updateDoc(postRef, {
+      //       likes: arrayRemove({ uid: currentUser.uid }), // Remove user by their uid
+      //     });
+      //   } else {
+      //     // User has not liked yet, add them to the likes array
+      //     await updateDoc(postRef, {
+      //       likes: arrayUnion({ uid: currentUser.uid }), // Add user by their uid
+      //     });
+      //   }
+
+      //   // Optionally, you may want to update the local state for UI feedback
+      //   setIsLiked(!isLiked); // Toggle the like state
+      // }
+    } catch (error: any) {
+      console.error("Error updating likes:", error.message);
+    }
   };
 
   const handleSave = async () => {
@@ -55,7 +110,7 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
     setIsOpen(!isOpen);
   };
 
-  const totalLikes = likes.length + (isLiked ? 1 : 0); // Count likes as the length of the array
+  const totalLikes = likes.length; // Count likes as the length of the array
 
   return (
     <div className='post-card'>
@@ -67,7 +122,6 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
       <div>
         <img
           loading='eager'
-          fetchPriority='high'
           src={imageUrl}
           alt='Post'
           className='post-card-image'
@@ -105,4 +159,4 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
   );
 };
 
-export default PostCard;
+export default React.memo(PostCard);
