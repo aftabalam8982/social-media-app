@@ -1,4 +1,20 @@
+// Chats
 
+
+export interface Message {
+    id: string;
+    text: string;
+    sender: string;
+    time: string;
+}
+
+export interface User {
+    id: string | number;
+    displayName: string;
+}
+
+
+// Posts
 export interface Comment {
     text: string;
     username: string;
