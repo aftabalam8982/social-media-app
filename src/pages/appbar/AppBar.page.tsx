@@ -31,6 +31,10 @@ const AppBar: React.FC = () => {
     }
   };
 
+  const handleMessage = () => {
+    navigate("/chat");
+  };
+
   return (
     <div className='app-bar'>
       <div className='logo' onClick={() => navigate("/")}>
@@ -47,6 +51,12 @@ const AppBar: React.FC = () => {
             >
               Welcome {currentUser.displayName || "User"}
             </span>
+            <Button
+              label='chat'
+              onClick={handleMessage}
+              style='secondary'
+              icon='🔔'
+            />
             <Button label='Logout' onClick={handleLogout} style='secondary' />
           </div>
         ) : (
