@@ -27,6 +27,7 @@
 .logged-out-container {
     display: flex;
     align-items: center;
+    max-width: 10rem;
 }
 
 .username {

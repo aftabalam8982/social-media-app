@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { createUserWithEmailAndPassword, getAuth, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { doc, getDoc, getFirestore, setDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-import { UserAuthProps } from "../types/types";
+import { Message, UserAuthProps } from "../types/types";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_APP_FIREBASE_API_KEY,
@@ -34,8 +34,9 @@ export const createUserDocumentFromAuth = async (userAuth: UserAuthProps, additi
     if (!userSnapshot.exists()) {
         const { displayName, email } = userAuth;
         const createdAt = new Date();
+        const message: Message[] = []
         try {
-            await setDoc(userDocRef, { displayName, email, createdAt, ...additionalInfo });
+            await setDoc(userDocRef, { displayName, email, message, createdAt, ...additionalInfo });
         } catch (error: any) {
             console.log('Error creating User', error.message)
         }

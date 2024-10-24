@@ -13,8 +13,8 @@
     width: 100%;
   }
   .secondary {
-    margin-bottom: 5px;
-    padding: 10px 20px;
+    margin: 0 4px 5px 0;
+    padding: 10px 10px;
     background-color:#f6f7f8;
     color: black;
     border: none;

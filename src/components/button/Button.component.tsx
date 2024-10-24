@@ -7,6 +7,7 @@ interface ButtonProps {
   type?: "button" | "submit" | "reset";
   disabled?: boolean;
   style?: "primary" | "secondary" | "comment";
+  icon?: any;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -15,6 +16,7 @@ const Button: React.FC<ButtonProps> = ({
   type = "button",
   disabled = false,
   style = "primary", // Default style
+  icon,
 }) => {
   return (
     <button
@@ -23,7 +25,7 @@ const Button: React.FC<ButtonProps> = ({
       onClick={onClick}
       disabled={disabled}
     >
-      {label}
+      {`${label} ${icon ? icon : ""}`}
     </button>
   );
 };
