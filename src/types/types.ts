@@ -9,8 +9,10 @@ export interface Message {
 }
 
 export interface User {
-    id: string | number;
+    id: string;
     displayName: string;
+    email: string,
+    messages: Message[]
 }
 
 
@@ -45,9 +47,10 @@ export interface FirebaseTimestamp {
 // firebase user
 
 export interface UserAuthProps {
+    id?: string,
     displayName: string | null,
     email: string | null,
-    uid: string
+    uid: string,
 }
 
 // formData
