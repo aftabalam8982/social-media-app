@@ -1,129 +1,112 @@
-// ChatUI.tsx
 import React, { useEffect, useState } from "react";
 import "./ChatUi.style.css";
 import {
   arrayUnion,
   collection,
   doc,
-  getDoc,
   onSnapshot,
   query,
   updateDoc,
+  Unsubscribe,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase.config";
 import { Message, User } from "../../types/types";
 import { useAuth } from "../../contexts/userAuthContext";
 
-// const mockChats = [
-//   { id: "1", name: "Alice" },
-//   { id: "2", name: "Bob" },
-//   { id: "3", name: "Charlie" },
-// ];
-
-// const mockMessages: Message[] = [
-//   { id: "1", text: "Hey there!", sender: "me", time: "10:00 AM" },
-//   { id: "2", text: "Hello! How are you?", sender: "other", time: "10:01 AM" },
-// ];
-
 const ChatUI: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [users, setUsers] = useState<User[]>([]);
-  const [user, setUser] = useState<User>();
+  const [user, setUser] = useState<User | null>(null);
   const { currentUser } = useAuth();
 
-  const fetchUsers = async () => {
-    try {
-      const usersRef = collection(db, "users");
-      const q = query(usersRef);
-      //   const usersSnapshot = await getDocs(usersRef);
-      const unsubscribe = onSnapshot(q, (usersSnapshot) => {
-        const usersData = usersSnapshot.docs.map((doc: any) => ({
-          ...doc.data(),
-          id: doc.id,
-        }));
-        // console.log(usersData);
-        // const users = usersData?.map((user) => ({
-        //   id: user.id,
-        //   displayName: user.displayName,
-        // }));
-        setUsers(usersData);
-      });
-      return () => unsubscribe();
-    } catch (error: any) {
-      console.log("getting error fetching users:", error.message);
-    }
-  };
-  //   console.log(users);
+  // Fetch users and listen for changes
+  const fetchUsers = (): Unsubscribe => {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef);
+    const unsubscribe = onSnapshot(q, (usersSnapshot) => {
+      const usersData = usersSnapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      })) as User[];
+      setUsers(usersData);
+    });
 
-  const fetchMessages = async (uid: string) => {
-    if (!currentUser) return;
-    try {
-      const userRef = doc(db, "users", uid);
-      const getDocSnapshot = await getDoc(userRef);
-      if (getDocSnapshot.exists()) {
-        const userMessages = getDocSnapshot.data();
-        // console.log(userMessages);
-        setMessages(userMessages.messages);
+    return unsubscribe; // Return unsubscribe function to clean up listener
+  };
+
+  // Fetch messages for a specific user and return an unsubscribe function
+  const fetchMessages = (uid: string): Unsubscribe | undefined => {
+    if (!currentUser) return undefined;
+
+    const userRef = doc(db, "users", uid);
+    const unsubscribe = onSnapshot(userRef, (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const userData = docSnapshot.data() as User;
+        setMessages(userData.messages || []);
       }
-    } catch (error: any) {
-      console.log("fetching message error:", error.message);
-    }
+    });
+
+    return unsubscribe; // Return unsubscribe function to clean up listener
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-  //   console.log(currentUser);
+  // Handle sending a new message
   const handleSendMessage = async () => {
-    if (!user) return;
-    if (!currentUser) return;
-    console.log(user.id, currentUser.uid);
-    try {
-      const userRef = doc(db, "users", currentUser?.uid);
-      const otherUserRef = doc(db, "users", user?.id);
-      const otherUserDoc = await getDoc(otherUserRef);
-      const userDoc = await getDoc(userRef);
-      if (userDoc.exists() && otherUserDoc.exists()) {
-        const date = new Date(); // Or any date object
-        const timeString = date.toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "numeric",
-          hour12: true,
-        });
-        await updateDoc(otherUserRef, {
-          messages: arrayUnion({
-            id: Date.now().toString(),
-            text: newMessage.trim(),
-            sender: currentUser.uid,
-            time: timeString,
-          }),
-        });
-        // if (user.id !== currentUser.uid) {
-        //   await updateDoc(otherUserRef, {
-        //     messages: arrayUnion({
-        //       id: Date.now().toString(),
-        //       text: newMessage.trim(),
-        //       sender: user.id,
-        //       time: timeString,
-        //     }),
-        //   });
-        // }
+    if (!user || !currentUser || !newMessage.trim()) return;
 
-        setNewMessage("");
-      }
+    try {
+      const timeString = new Date().toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      });
+
+      const message: Message = {
+        id: Date.now().toString(),
+        text: newMessage.trim(),
+        sender: currentUser.uid,
+        time: timeString,
+      };
+
+      // Update the recipient user's messages
+      const otherUserRef = doc(db, "users", user.id);
+      await updateDoc(otherUserRef, {
+        messages: arrayUnion(message),
+      });
+
+      // Update local state to reflect the message immediately
+      setNewMessage("");
     } catch (error: any) {
-      console.log("getting error while adding text:", error.message);
+      console.log("Error while sending message:", error.message);
     }
   };
 
+  // Handle user click and switch chat
   const handleUserClick = (id: string) => {
-    const userData = users.find((user) => user.id === id);
+    const selectedUser = users.find((user) => user.id === id);
+    if (selectedUser) {
+      // Unsubscribe from previous user's messages
+      if (user) {
+        const prevUnsubscribe = fetchMessages(user.id);
+        if (prevUnsubscribe) prevUnsubscribe(); // Call the previous unsubscribe function
+      }
 
-    fetchMessages(id);
-    setUser(userData);
-    setMessages(userData?.messages || []);
+      setUser(selectedUser);
+
+      // Fetch new user's messages in real-time
+      const newUnsubscribe = fetchMessages(id);
+      return newUnsubscribe; // Return unsubscribe function
+    }
   };
+
+  // Set up user fetching and cleanup on component unmount
+  useEffect(() => {
+    const unsubscribeUsers = fetchUsers(); // Fetch and listen to users
+
+    return () => {
+      unsubscribeUsers(); // Clean up user listener
+    };
+  }, []);
 
   return (
     <div className='chat-container'>
@@ -131,14 +114,11 @@ const ChatUI: React.FC = () => {
       <div className='chat-list'>
         <h3>Chats</h3>
         <ul>
-          {users?.map((user) => {
-            const { id, displayName } = user;
-            return (
-              <li onClick={() => handleUserClick(id)} key={id}>
-                {displayName?.toUpperCase()}
-              </li>
-            );
-          })}
+          {users?.map((user) => (
+            <li key={user.id} onClick={() => handleUserClick(user.id)}>
+              {user.displayName?.toUpperCase()}
+            </li>
+          ))}
         </ul>
       </div>
 
@@ -149,7 +129,7 @@ const ChatUI: React.FC = () => {
         </div>
 
         <div className='chat-body'>
-          {messages?.map((message) => (
+          {messages.map((message) => (
             <div
               key={message.id}
               className={`message ${
