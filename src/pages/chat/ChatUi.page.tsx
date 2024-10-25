@@ -11,7 +11,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase.config";
-import { Message, User, UserAuthProps } from "../../types/types";
+import { Message, User } from "../../types/types";
 import { useAuth } from "../../contexts/userAuthContext";
 
 // const mockChats = [
