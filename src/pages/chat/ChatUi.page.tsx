@@ -11,7 +11,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase.config";
-import { Message, User } from "../../types/types";
+import { Message, User, UserAuthProps } from "../../types/types";
 import { useAuth } from "../../contexts/userAuthContext";
 
 // const mockChats = [
@@ -20,16 +20,17 @@ import { useAuth } from "../../contexts/userAuthContext";
 //   { id: "3", name: "Charlie" },
 // ];
 
-const mockMessages: Message[] = [
-  { id: "1", text: "Hey there!", sender: "me", time: "10:00 AM" },
-  { id: "2", text: "Hello! How are you?", sender: "other", time: "10:01 AM" },
-];
+// const mockMessages: Message[] = [
+//   { id: "1", text: "Hey there!", sender: "me", time: "10:00 AM" },
+//   { id: "2", text: "Hello! How are you?", sender: "other", time: "10:01 AM" },
+// ];
 
 const ChatUI: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>(mockMessages);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [users, setUsers] = useState<User[]>([]);
-  const { currentUser, setCurrentUser } = useAuth();
+  const [user, setUser] = useState<User>();
+  const { currentUser } = useAuth();
 
   const fetchUsers = async () => {
     try {
@@ -41,12 +42,12 @@ const ChatUI: React.FC = () => {
           ...doc.data(),
           id: doc.id,
         }));
-        console.log(usersData);
-        const users = usersData?.map((user) => ({
-          id: user.id,
-          displayName: user.displayName,
-        }));
-        setUsers(users);
+        // console.log(usersData);
+        // const users = usersData?.map((user) => ({
+        //   id: user.id,
+        //   displayName: user.displayName,
+        // }));
+        setUsers(usersData);
       });
       return () => unsubscribe();
     } catch (error: any) {
@@ -55,14 +56,14 @@ const ChatUI: React.FC = () => {
   };
   //   console.log(users);
 
-  const fetchMessages = async () => {
+  const fetchMessages = async (uid: string) => {
     if (!currentUser) return;
     try {
-      const userRef = doc(db, "users", currentUser.uid);
+      const userRef = doc(db, "users", uid);
       const getDocSnapshot = await getDoc(userRef);
       if (getDocSnapshot.exists()) {
         const userMessages = getDocSnapshot.data();
-        console.log(userMessages);
+        // console.log(userMessages);
         setMessages(userMessages.messages);
       }
     } catch (error: any) {
@@ -72,22 +73,25 @@ const ChatUI: React.FC = () => {
 
   useEffect(() => {
     fetchUsers();
-    fetchMessages();
   }, []);
   //   console.log(currentUser);
   const handleSendMessage = async () => {
+    if (!user) return;
     if (!currentUser) return;
+    console.log(user.id, currentUser.uid);
     try {
       const userRef = doc(db, "users", currentUser?.uid);
+      const otherUserRef = doc(db, "users", user?.id);
+      const otherUserDoc = await getDoc(otherUserRef);
       const userDoc = await getDoc(userRef);
-      if (userDoc.exists()) {
+      if (userDoc.exists() && otherUserDoc.exists()) {
         const date = new Date(); // Or any date object
         const timeString = date.toLocaleTimeString("en-US", {
           hour: "numeric",
           minute: "numeric",
           hour12: true,
         });
-        const response = await updateDoc(userRef, {
+        await updateDoc(otherUserRef, {
           messages: arrayUnion({
             id: Date.now().toString(),
             text: newMessage.trim(),
@@ -95,12 +99,30 @@ const ChatUI: React.FC = () => {
             time: timeString,
           }),
         });
-        console.log(response);
+        // if (user.id !== currentUser.uid) {
+        //   await updateDoc(otherUserRef, {
+        //     messages: arrayUnion({
+        //       id: Date.now().toString(),
+        //       text: newMessage.trim(),
+        //       sender: user.id,
+        //       time: timeString,
+        //     }),
+        //   });
+        // }
+
         setNewMessage("");
       }
     } catch (error: any) {
       console.log("getting error while adding text:", error.message);
     }
+  };
+
+  const handleUserClick = (id: string) => {
+    const userData = users.find((user) => user.id === id);
+
+    fetchMessages(id);
+    setUser(userData);
+    setMessages(userData?.messages || []);
   };
 
   return (
@@ -109,20 +131,25 @@ const ChatUI: React.FC = () => {
       <div className='chat-list'>
         <h3>Chats</h3>
         <ul>
-          {users.map((chat) => (
-            <li key={chat.id}>{chat.displayName.toUpperCase()}</li>
-          ))}
+          {users?.map((user) => {
+            const { id, displayName } = user;
+            return (
+              <li onClick={() => handleUserClick(id)} key={id}>
+                {displayName?.toUpperCase()}
+              </li>
+            );
+          })}
         </ul>
       </div>
 
       {/* Chat Window */}
       <div className='chat-window'>
         <div className='chat-header'>
-          <h3>Chat with Alice</h3>
+          <h3>{user?.displayName || "Anonymous"}</h3>
         </div>
 
         <div className='chat-body'>
-          {messages.map((message) => (
+          {messages?.map((message) => (
             <div
               key={message.id}
               className={`message ${
