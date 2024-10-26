@@ -45,3 +45,71 @@
 }
 
 
+/* For larger screens (default) */
+@media (min-width: 576px) {
+    .nav-items {
+      display: flex;
+      align-items: center;
+    }
+    .menu-icon {
+      display: none;
+    }
+    .menu-items {
+      display: none;
+    }
+  }
+  
+  /* For mobile/small screens */
+  @media (max-width: 575px) {
+    /* Hide the regular nav items */
+    .nav-items {
+      display: none;
+    }
+  
+    /* Show hamburger icon */
+    .menu-icon {
+      display: inline-block;
+      cursor: pointer;
+      font-size: 24px;
+      color: #fff;
+    }
+  
+    /* Menu dropdown */
+    .menu-items {
+      display: none;
+      flex-direction: column;
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background-color: #007bff;
+      padding: 10px;
+      border-radius: 5px;
+      z-index: 1000;
+    }
+  
+    .menu-items a,
+    .menu-items button,
+    .menu-items span {
+      color: white;
+      padding: 10px;
+      text-align: left;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+  
+    .menu-items a:hover,
+    .menu-items button:hover,
+    .menu-items span:hover {
+      background-color: #0056b3;
+    }
+  
+    /* Show the menu when clicked */
+    .menu-items.show {
+      display: flex;
+    }
+  }
+  
+  
+  
