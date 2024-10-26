@@ -14,7 +14,6 @@ import { Message, User } from "../../types/types";
 import { useAuth } from "../../contexts/userAuthContext";
 import ChatBody from "../../components/chat-body/Chat-body.component";
 import ChatInput from "../../components/chat-input/Chat-input.component";
-import ChatList from "../../components/chat-list/ChatList.component";
 import Button from "../../components/button/Button.component";
 
 const ChatUI: React.FC = () => {
@@ -22,7 +21,6 @@ const ChatUI: React.FC = () => {
   const [newMessage, setNewMessage] = useState("");
   const [users, setUsers] = useState<User[]>([]);
   const [user, setUser] = useState<User | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
   const { currentUser } = useAuth();
 
   // Fetch users and listen for changes
