@@ -4,3 +4,22 @@
   box-sizing: border-box;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
+
+/* Default Styles for Desktop */
+body {
+  font-size: 18px;
+  padding: 20px;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: row;
+  padding: 20px;
+}
+
+

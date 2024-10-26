@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./AppBar.style.css";
 import { useNavigate } from "react-router-dom";
 import Button from "../../components/button/Button.component";
@@ -8,6 +8,11 @@ import { logoutUser } from "../../firebase/firebase.config";
 const AppBar: React.FC = () => {
   const { currentUser } = useAuth(); // Get current user from AuthContext
   const navigate = useNavigate();
+  const [isMenuOpen, setMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setMenuOpen(!isMenuOpen);
+  };
 
   // Handle Logout
   const handleLogout = async () => {
@@ -41,7 +46,27 @@ const AppBar: React.FC = () => {
         MySocialApp
       </div>
 
-      <div className='nav-items '>
+      {/* Hamburger Menu for small devices */}
+      <div className='menu-icon' onClick={toggleMenu}>
+        ☰
+      </div>
+
+      {/* Collapsible menu for small screens */}
+      <div className={`menu-items ${isMenuOpen ? "show" : ""}`}>
+        {currentUser && (
+          <>
+            <span onClick={handleProfileClick}>
+              {currentUser.displayName || "User"}
+            </span>
+            <a onClick={handleMessage}>Chat</a>
+            <button onClick={handleLogout}>Logout</button>
+          </>
+        )}
+        {!currentUser && <button onClick={handleLogin}>Login/Register</button>}
+      </div>
+
+      {/* Nav items for larger screens */}
+      <div className='nav-items'>
         {currentUser ? (
           <div className='logged-in-container'>
             <span
@@ -52,7 +77,7 @@ const AppBar: React.FC = () => {
               Welcome {currentUser.displayName || "User"}
             </span>
             <Button
-              label='chat'
+              label='Chat'
               onClick={handleMessage}
               style='secondary'
               icon='🔔'

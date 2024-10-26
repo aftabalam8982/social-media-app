@@ -12,12 +12,17 @@ import {
 import { db } from "../../firebase/firebase.config";
 import { Message, User } from "../../types/types";
 import { useAuth } from "../../contexts/userAuthContext";
+import ChatBody from "../../components/chat-body/Chat-body.component";
+import ChatInput from "../../components/chat-input/Chat-input.component";
+import ChatList from "../../components/chat-list/ChatList.component";
+import Button from "../../components/button/Button.component";
 
 const ChatUI: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [users, setUsers] = useState<User[]>([]);
   const [user, setUser] = useState<User | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
   const { currentUser } = useAuth();
 
   // Fetch users and listen for changes
@@ -109,50 +114,37 @@ const ChatUI: React.FC = () => {
   }, []);
 
   return (
-    <div className='chat-container'>
+    <div className={`chat-container ${user ? "user-selected" : ""}`}>
       {/* Chat List */}
-      <div className='chat-list'>
+      <div className={`chat-list ${user ? "hidden" : ""}`}>
         <h3>Chats</h3>
         <ul>
-          {users?.map((user) => (
-            <li key={user.id} onClick={() => handleUserClick(user.id)}>
-              {user.displayName?.toUpperCase()}
-            </li>
-          ))}
+          {users?.map((user) => {
+            const { id, displayName } = user;
+            return (
+              <li onClick={() => handleUserClick(id)} key={id}>
+                {displayName?.toUpperCase()}
+              </li>
+            );
+          })}
         </ul>
       </div>
 
       {/* Chat Window */}
-      <div className='chat-window'>
+      <div className={`chat-window ${user ? "" : "hidden"}`}>
         <div className='chat-header'>
+          <Button label='⬅' onClick={() => setUser(null)} style='comment' />
           <h3>{user?.displayName || "Anonymous"}</h3>
         </div>
 
-        <div className='chat-body'>
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`message ${
-                message.sender === currentUser?.uid ? "sent" : "received"
-              }`}
-            >
-              <p>{message.text}</p>
-              <span>{message.time}</span>
-            </div>
-          ))}
-        </div>
+        <ChatBody messages={messages} />
 
         {/* Message Input */}
-        <div className='chat-input'>
-          <input
-            type='text'
-            placeholder='Type a message...'
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-          />
-          <button onClick={handleSendMessage}>Send</button>
-        </div>
+        <ChatInput
+          newMessage={newMessage}
+          setNewMessage={setNewMessage}
+          handleSendMessage={handleSendMessage}
+        />
       </div>
     </div>
   );
